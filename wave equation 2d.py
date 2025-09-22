@@ -6,7 +6,6 @@ import matplotlib.animation as animation
 v=2
 dx, x_range=0.01, 5.0
 dt = 0.001
-frames=15000
 
 # 배열
 x = np.arange(-x_range, x_range + dx, dx)
@@ -47,7 +46,6 @@ def update(frame):
 ani = animation.FuncAnimation(
     fig,
     update,
-    frames=frames,
     init_func=init,
     interval=int(1000 * dt),
     blit=True,

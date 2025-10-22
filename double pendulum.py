@@ -91,7 +91,7 @@ ani = animation.FuncAnimation(
     fig,
     update,
     init_func=init,
-    interval=int(1000 * dt),
+    interval=1000 * dt,
     blit=True,
     repeat=False,
 )

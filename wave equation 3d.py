@@ -30,6 +30,7 @@ t=args.t
 sigma=args.sigma
 
 dt = args.dt
+frames = int(t / dt)
 
 z = xp.zeros((ny, nx), dtype=xp.float32)
 v = xp.zeros_like(z) 
@@ -58,14 +59,13 @@ def apply_bc(Z, V):
 
 
 amp0 = float((xp.max(xp.abs(z))).item() if on_gpu else np.max(np.abs(z)))
-norm = mpl.colors.TwoSlopeNorm(vmin=-amp0, vcenter=0.0, vmax=amp0)
 
 fig = plt.figure()
 ax = fig.add_subplot(111, projection="3d")
 ax.set(
     xlim=(0, Lx),
     ylim=(0, Ly),
-    zlim=(-1.0, 1.0),
+    zlim=(-amp0, amp0),
     xlabel="x",
     ylabel="y",
     zlabel="z",
@@ -89,6 +89,7 @@ surf = ax.plot_surface(
 
 
 def update(frame):
+    print(f"{frame}/{frames}")
     global z, v, surf
     # a = c^2 * ∇^2 z
     a = c**2 * laplacian(z)
@@ -114,5 +115,5 @@ def update(frame):
     return (surf,)
 
 
-ani = FuncAnimation(fig, update, frames=int(t/dt), interval=dt*1000, blit=False)
+ani = FuncAnimation(fig, update, frames=frames, interval=dt*1000, blit=False)
 ani.save("wave.mp4", writer="ffmpeg", fps=int(1/dt))

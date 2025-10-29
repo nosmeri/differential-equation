@@ -1,28 +1,49 @@
-import numpy as np
+import argparse
+
+
+parser = argparse.ArgumentParser(description="3D Wave Simulation")
+parser.add_argument("--Lx", type=float, default=2.0, help="X 길이")
+parser.add_argument("--Ly", type=float, default=2.0, help="Y 길이")
+parser.add_argument("--nx", type=int, default=201, help="X 격자 개수")
+parser.add_argument("--ny", type=int, default=201, help="Y 격자 개수")
+parser.add_argument("--dt", type=float, default=0.002, help="시간 간격 Δt")
+parser.add_argument("--c", type=float, default=0.5, help="파동 속도")
+parser.add_argument("--sigma", type=float, default=0.18, help="초기 가우시안 폭")
+parser.add_argument("--t", type=int, default=60, help="렌더링 길이")
+args = parser.parse_args()
+
+
+from cnpy import xp, to_cpu, on_gpu
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
+import numpy as np
 
-c = .5
-Lx, Ly = 2.0, 2.0
-nx, ny = 71, 71 
-x = np.linspace(0, Lx, nx)
-y = np.linspace(0, Ly, ny)
-dx = x[1] - x[0]
-dy = y[1] - y[0]
+c = args.c
+Lx, Ly = args.Lx, args.Ly
+nx, ny = args.nx, args.ny 
+x = xp.linspace(0, Lx, nx, dtype=xp.float32)
+y = xp.linspace(0, Ly, ny, dtype=xp.float32)
+dx = float(x[1] - x[0])
+dy = float(y[1] - y[0])
+t=args.t
+sigma=args.sigma
 
-dt = 0.01
+dt = args.dt
 
-z = np.zeros((ny, nx), dtype=float)
-v = np.zeros_like(z) 
+z = xp.zeros((ny, nx), dtype=xp.float32)
+v = xp.zeros_like(z) 
 
-X, Y = np.meshgrid(x, y)
-x0, y0, sigma = Lx * 0.5, Ly * 0.5, 0.18
-z[:] = np.exp(-((X - x0) ** 2 + (Y - y0) ** 2) / (2 * sigma**2))
-v[:] = 0.0
+X_cpu, Y_cpu = np.meshgrid(np.linspace(0, Lx, nx), np.linspace(0, Ly, ny))
+
+x0, y0 = Lx * 0.5, Ly * 0.5
+Xb = xp.asarray(X_cpu) if on_gpu else X_cpu
+Yb = xp.asarray(Y_cpu) if on_gpu else Y_cpu
+z[:] = xp.exp(-((Xb - x0) ** 2 + (Yb - y0) ** 2) / (2 * sigma**2))
 
 
 def laplacian(Z):
-    L = np.zeros_like(Z)
+    L = xp.zeros_like(Z)
     L[1:-1, 1:-1] = (Z[2:, 1:-1] - 2 * Z[1:-1, 1:-1] + Z[:-2, 1:-1]) / dy**2 + (
         Z[1:-1, 2:] - 2 * Z[1:-1, 1:-1] + Z[1:-1, :-2]
     ) / dx**2
@@ -35,6 +56,9 @@ def apply_bc(Z, V):
     V[0, :] = V[-1, :] = 0.0
     V[:, 0] = V[:, -1] = 0.0
 
+
+amp0 = float((xp.max(xp.abs(z))).item() if on_gpu else np.max(np.abs(z)))
+norm = mpl.colors.TwoSlopeNorm(vmin=-amp0, vcenter=0.0, vmax=amp0)
 
 fig = plt.figure()
 ax = fig.add_subplot(111, projection="3d")
@@ -49,17 +73,18 @@ ax.set(
 )
 
 # 초기 surface
+z0_cpu = to_cpu(z)
 surf = ax.plot_surface(
-    X,
-    Y,
-    z,
+    X_cpu,
+    Y_cpu,
+    z0_cpu,
     cmap="RdBu_r",
     rstride=1,
     cstride=1,
     linewidth=0,
     antialiased=True,
-    vmin=-np.max(np.abs(z)),
-    vmax=np.max(np.abs(z)),
+    vmin=-amp0,
+    vmax=amp0,
 )
 
 
@@ -71,21 +96,23 @@ def update(frame):
     z += v * dt
     apply_bc(z, v)
 
+    z_cpu=to_cpu(z)
+
     surf.remove()
     surf = ax.plot_surface(
-        X,
-        Y,
-        z,
+        X_cpu,
+        Y_cpu,
+        z_cpu,
         cmap="RdBu_r",
         rstride=1,
         cstride=1,
         linewidth=0,
         antialiased=True,
-        vmin=-np.max(np.abs(z)),
-        vmax=np.max(np.abs(z)),
+        vmin=-amp0,
+        vmax=amp0,
     )
     return (surf,)
 
 
-ani = FuncAnimation(fig, update, frames=int(60/dt), interval=dt*1000, blit=False)
+ani = FuncAnimation(fig, update, frames=int(t/dt), interval=dt*1000, blit=False)
 ani.save("wave.mp4", writer="ffmpeg", fps=int(1/dt))

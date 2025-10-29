@@ -38,9 +38,10 @@ Lx, Ly = args.Lx, args.Ly
 nx, ny = args.nx, args.ny
 dt = args.dt
 sigma = args.sigma
-substeps = max(1, args.substeps)
 fps = args.fps
 ds = max(1, args.ds)
+
+substeps = int((1 / dt) / fps)
 
 x = xp.linspace(0, Lx, nx, dtype=xp.float32)
 y = xp.linspace(0, Ly, ny, dtype=xp.float32)
@@ -120,7 +121,8 @@ if args.mode == "2d":
     )
     fig.colorbar(im, ax=ax, label="z")
 
-    def update(_):
+    def update(frame):
+        print(f"{frame}/{frames}")
         for _ in range(substeps):
             step()
         im.set_data(to_cpu(z))
@@ -163,6 +165,7 @@ else:
     )
 
     def update(frame):
+        print(f"{frame}/{frames}")
         global surf
         for _ in range(substeps):
             step()

@@ -72,7 +72,7 @@ view_range = 3e11
 def on_key_press(event):
     global tracking_body_index, view_range
 
-    if event.key in ['0', '1', '2','3']:
+    if event.key in ['0', '1', '2','3', '4', '5']:
         new_index = int(event.key)
         if new_index < len(bodies):
             tracking_body_index = new_index
@@ -88,9 +88,16 @@ axplt.set_title("N-body problem")
 axplt.set_aspect("equal")
 
 body_markers = []
+body_trackers = []
+pos_x = []
+pos_y = []
 for body in bodies:
     marker, = axplt.plot([], [], "o", markersize=5, color=body.color)
+    tracker, = axplt.plot([],[], lw=1, color=body.color)
     body_markers.append(marker)
+    body_trackers.append(tracker)
+    pos_x.append(np.full(100, body.position.x))
+    pos_y.append(np.full(100, body.position.y))
 
 def init():
     # 초기 화면을 추적 중인 천체 중심으로 설정
@@ -101,7 +108,7 @@ def init():
     axplt.set_ylim(center_y - view_range, center_y + view_range)
     for i, body in enumerate(bodies):
         body_markers[i].set_data([body.position.x], [body.position.y])
-    return tuple(body_markers)
+    return tuple(body_markers+body_trackers)
 
 
 def update(frame):
@@ -127,7 +134,12 @@ def update(frame):
     # 각 천체 마커 업데이트
     for i, body in enumerate(bodies):
         body_markers[i].set_data([body.position.x], [body.position.y])
-    return tuple(body_markers)
+        pos_x[i] = np.roll(pos_x[i], -1)
+        pos_y[i] = np.roll(pos_y[i], -1)
+        pos_x[i][-1] = body.position.x
+        pos_y[i][-1] = body.position.y
+        body_trackers[i].set_data(pos_x[i], pos_y[i])
+    return tuple(body_markers+body_trackers)
 
 
 # 키보드 이벤트 연결

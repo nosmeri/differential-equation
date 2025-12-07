@@ -14,9 +14,9 @@ E=S*np.pi*R**2 # 지구로 들어오는 총 에너지
 CM_surface=10000000000000000 # 지표 열용량
 CM_air=10000000000000000 # 대기 열용량
 albedo_air=0.31 # 대기 반사율
-transmittance_space_to_surface=0.7 # 단파 복사 대기 투과율
+transmittance_space_to_surface=0.64 # 단파 복사 대기 투과율
 transmittance_surface_to_space=0.09 # 장파 복사 대기 투과율
-radiation_air_to_surface=0.64 # 대기->지표 복사율
+radiation_air_to_surface=0.56 # 대기->지표 복사율
 
 
 t=np.arange(0,time_limit,dt)

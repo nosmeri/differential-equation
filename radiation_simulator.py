@@ -11,8 +11,8 @@ sigma=5.670374419e-8
 R=6371000 # 지구 반지름
 S=1361 # 태양상수
 E=S*np.pi*R**2 # 지구로 들어오는 총 에너지
-CM_surface=10000000000000000 # 지표 열용량
-CM_air=10000000000000000 # 대기 열용량
+CM_surface=1e16 # 지표 열용량
+CM_air=1e16 # 대기 열용량
 albedo_air=0.31 # 대기 반사율
 transmittance_space_to_surface=0.64 # 단파 복사 대기 투과율
 transmittance_surface_to_space=0.09 # 장파 복사 대기 투과율
@@ -29,8 +29,8 @@ axplt.set_xlabel("t (s)")
 axplt.set_ylabel("T (K)")
 axplt.set_title("Radiation simulation")
 
-air, = axplt.plot([], [], lw=2, color="blue")
-surface, = axplt.plot([], [], lw=2, color="green")
+air, = axplt.plot([], [], lw=2, color="blue", label="air temperature")
+surface, = axplt.plot([], [], lw=2, color="green", label="surface temperature")
 
 axplt.set_xlim(0,time_limit)
 axplt.set_ylim(0,500)
@@ -66,4 +66,5 @@ ani = animation.FuncAnimation(
     repeat=False,
 )
 
+plt.legend()
 plt.show()

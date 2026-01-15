@@ -6,7 +6,7 @@ k=1
 m=1
 x=3
 
-dt=0.1
+dt=0.3
 
 A=x
 
@@ -15,7 +15,7 @@ euler_v=0
 rk4_x=x
 rk4_v=0
 
-t=-50
+t=0
 
 real_x_history=[x]
 euler_x_history=[euler_x]
@@ -23,8 +23,8 @@ rk4_x_history=[rk4_x]
 t_history=[t]
 
 fig, axplt = plt.subplots()
-axplt.set_xlim(0, 20)
-axplt.set_ylim(-10, 10)
+axplt.set_xlim(50, 58)
+axplt.set_ylim(-4, 4)
 axplt.set_xlabel("t (s)")
 axplt.set_ylabel("x (m)")
 axplt.set_title("Spring motion")

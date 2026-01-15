@@ -12,40 +12,38 @@ dt=5e-3
 
 theta1=3*np.pi/4
 theta1_dot=0
-theta1_dot_dot=0
 
 theta2=np.pi
 theta2_dot = 0
-theta2_dot_dot = 0
 
 x = np.full(500, l1 * np.sin(theta1) + l2 * np.sin(theta2))
 y = np.full(500, -l1 * np.cos(theta1) - l2 * np.cos(theta2))
 
-def cal():
-    global theta1, theta1_dot, theta1_dot_dot, theta2, theta2_dot, theta2_dot_dot
-
+def derivation(state):
     theta1_dot_dot = (
-        -g * (2 * m1 + m2) * np.sin(theta1)
-        - m2 * g * np.sin(theta1 - 2 * theta2)
+        -g * (2 * m1 + m2) * np.sin(state[0])
+        - m2 * g * np.sin(state[0] - 2 * state[2])
         - 2
-        * np.sin(theta1 - theta2)
+        * np.sin(state[0] - state[2])
         * m2
-        * (theta2_dot**2 * l2 + theta1_dot**2 * l1 * np.cos(theta1 - theta2))
-    ) / (l1 * (2 * m1 + m2 - m2 * np.cos(2 * theta1 - 2 * theta2)))
+        * (state[3]**2 * l2 + state[1]**2 * l1 * np.cos(state[0] - state[2]))
+    ) / (l1 * (2 * m1 + m2 - m2 * np.cos(2 * state[0] - 2 * state[2])))
     theta2_dot_dot = (
         2
-        * np.sin(theta1 - theta2)
+        * np.sin(state[0] - state[2])
         * (
-            (m1 + m2)*(theta1_dot**2 * l1 + g * np.cos(theta1))
-            + theta2_dot**2 * l2 * m2 * np.cos(theta1 - theta2)
+            (m1 + m2)*(state[1]**2 * l1 + g * np.cos(state[0]))
+            + state[3]**2 * l2 * m2 * np.cos(state[0] - state[2])
         )
-    ) / (l2 * (2 * m1 + m2 - m2 * np.cos(2 * theta1 - 2 * theta2)))
+    ) / (l2 * (2 * m1 + m2 - m2 * np.cos(2 * state[0] - 2 * state[2])))
+    return np.array([state[1], theta1_dot_dot, state[3], theta2_dot_dot])
 
-    theta1_dot += theta1_dot_dot*dt
-    theta2_dot += theta2_dot_dot*dt
-
-    theta1 += theta1_dot*dt
-    theta2 += theta2_dot*dt
+def rk4_step(state):
+    k1=derivation(state)
+    k2=derivation(state+dt/2*k1)
+    k3=derivation(state+dt/2*k2)
+    k4=derivation(state+dt*k3)
+    return state + dt*(k1+2*k2+2*k3+k4)/6
 
 
 # 애니메이션 준비
@@ -72,13 +70,15 @@ def init():
 
 
 def update(frame):
-    global x, y
+    global x, y, theta1, theta1_dot, theta2, theta2_dot
     x[1:] = x[:-1]
     y[1:] = y[:-1]
     x[0] = l1 * np.sin(theta1) + l2 * np.sin(theta2)
     y[0] = -l1 * np.cos(theta1) - l2 * np.cos(theta2)
-    cal()
-
+    
+    state=np.array([theta1, theta1_dot, theta2, theta2_dot])
+    state=rk4_step(state)
+    theta1, theta1_dot, theta2, theta2_dot=state
 
     T1 = 0.5 * m1 * (l1 * theta1_dot)**2
     V1 = -m1 * g * l1 * np.cos(theta1)

@@ -39,7 +39,7 @@ class Body:
         self.color = color
 
 bodies = [
-    Body(mass=1,position=Vector2D(-1., 0.), velocity=Vector2D(0.347111, 0.532728), color="red"),
+    Body(mass=1,position=Vector2D(-.9, 0.), velocity=Vector2D(0.347111, 0.532728), color="red"),
     Body(mass=1,position=Vector2D(1., 0.), velocity=Vector2D(0.347111, 0.532728), color="green"),
     Body(mass=1,position=Vector2D(0., 0.), velocity=Vector2D(-0.694222, -1.065456), color="blue"),
 ]

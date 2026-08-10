@@ -1,3 +1,12 @@
+[[tool.uv.index]]
+name = "pytorch-cu126"
+url = "https://download.pytorch.org/whl/cu126"
+explicit = true 
+
+[tool.uv.sources]
+torch = [{ index = "pytorch-cu126" }]
+torchvision = [{ index = "pytorch-cu126" }]
+
 [project]
 name = "differential-equation"
 version = "0.1.0"
@@ -10,4 +19,6 @@ dependencies = [
     "numpy>=2.3.3",
     "pyqt5>=5.15.11",
     "scipy>=1.17.1",
+    "torch>=2.8.0",
+    "torchvision>=0.23.0",
 ]

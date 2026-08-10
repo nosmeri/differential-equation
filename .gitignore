@@ -10,3 +10,4 @@ wheels/
 .venv
 
 *.mp4
+*.png

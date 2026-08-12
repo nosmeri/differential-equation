@@ -10,7 +10,7 @@ L = 40.0
 x = np.linspace(-L/2, L/2, N, endpoint=False)
 dx = x[1] - x[0]
 
-k = np.fft.fftfreq(N, d=dx) * 2.0 * np.pi # 운동량 공간에서 각파수 (p*2pi)
+k = np.fft.fftfreq(N, d=dx) * 2.0 * np.pi # 운동량 공간에서 각파수 (p/h*2pi)  p/h가 주파수
 
 V_height = 15.0   
 barrier_width = 0.6  
